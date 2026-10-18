@@ -1,0 +1,15 @@
+{
+  "name": "verity",
+  "version": "1.0.0",
+  "description": "Verity: a measurable RAG engine (hybrid search, reranking, cited answers, live evaluation)",
+  "scripts": {
+    "build": "node scripts/build_corpus.mjs",
+    "test": "node --test test/*.test.js",
+    "deploy": "wrangler deploy"
+  },
+  "author": "Pinninti Sai Anish",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" }
+}

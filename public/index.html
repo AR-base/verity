@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verity — RAG mesurable</title>
+  <meta name="description" content="Verity: hybrid search, reranking, cited answers and a live evaluation of retrieval quality.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/vendor/mammoth.browser.min.js" defer></script>
+  <script type="module" src="/js/app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7"/><path d="M9 10l7 13 7-13"/><circle cx="16" cy="7" r="1.6"/></svg>
+      <div>
+        <h1>Verity</h1>
+        <p class="tagline" data-i18n="tagline"></p>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="Views">
+      <button type="button" class="tab" data-view="ask" data-i18n="navAsk"></button>
+      <button type="button" class="tab" data-view="library" data-i18n="navLibrary"></button>
+      <button type="button" class="tab" data-view="eval" data-i18n="navEval"></button>
+      <button type="button" class="tab" data-view="how" data-i18n="navHow"></button>
+    </nav>
+    <div class="top-right">
+      <span id="status" class="status" role="status"></span>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="fr">FR</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ================================================================ ASK -->
+    <section id="view-ask" class="view" data-view-panel="ask">
+      <div class="ask-grid">
+        <div class="ask-main">
+          <form id="ask-form" class="ask-box" autocomplete="off">
+            <label for="q" class="sr" data-i18n="askPlaceholder"></label>
+            <textarea id="q" rows="2" maxlength="1000" data-i18n-placeholder="askPlaceholder"></textarea>
+            <button type="submit" id="ask-btn" class="primary" data-i18n="askButton"></button>
+          </form>
+          <div class="modes" id="modes" role="radiogroup" data-i18n-aria="modeLabel"></div>
+          <div class="suggest">
+            <span class="suggest-label" data-i18n="tryThese"></span>
+            <div id="suggestions" class="chips"></div>
+          </div>
+
+          <div id="notice" class="notice" hidden></div>
+
+          <div id="progress" class="progress" hidden><span class="dot"></span><span id="progress-text"></span></div>
+
+          <article id="answer" class="answer" hidden>
+            <header><span class="kicker" data-i18n="answer"></span><span id="answer-model" class="mono muted"></span></header>
+            <div id="answer-body" class="answer-body"></div>
+            <footer id="answer-meta" class="answer-meta"></footer>
+          </article>
+
+          <section id="sources" class="sources" hidden>
+            <h2 class="kicker" data-i18n="sources"></h2>
+            <ol id="source-list"></ol>
+          </section>
+
+          <div id="intro" class="intro">
+            <div class="lang-block" data-lang-block="fr">
+              <p class="lead">Verity cherche dans les documents internes d’une entreprise et répond <em>uniquement</em> à partir de ce qu’il a trouvé, en citant chaque phrase.</p>
+              <p>L’entreprise est fictive : <strong>Nexa Digital</strong>, une agence web d’Angers (15 documents : facturation, sécurité, RGPD, support, RH, API…). Comparez les quatre méthodes de recherche sur la même question, puis ouvrez l’onglet <strong>Évaluation</strong> pour les mesurer sur 24 questions.</p>
+            </div>
+            <div class="lang-block" data-lang-block="en">
+              <p class="lead">Verity searches a company’s internal documents and answers <em>only</em> from what it found, citing every sentence.</p>
+              <p>The company is fictional: <strong>Nexa Digital</strong>, a web agency in Angers (15 documents: billing, security, GDPR, support, HR, API…). Compare the four retrieval methods on the same question, then open <strong>Evaluation</strong> to measure them on 24 questions.</p>
+            </div>
+          </div>
+        </div>
+
+        <aside class="trace" aria-labelledby="trace-title">
+          <h2 id="trace-title" class="kicker" data-i18n="trace"></h2>
+          <p class="hint" data-i18n="traceHint"></p>
+          <div id="trace-body" class="trace-body">
+            <div class="trace-empty" aria-hidden="true">
+              <div class="te-row"><span>BM25</span><i></i></div>
+              <div class="te-row"><span>Vectors</span><i></i></div>
+              <div class="te-row"><span>RRF</span><i></i></div>
+              <div class="te-row"><span>Rerank</span><i></i></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ================================================================ LIBRARY -->
+    <section id="view-library" class="view" data-view-panel="library" hidden>
+      <div class="lib-grid">
+        <div class="lib-side">
+          <h2 class="title" data-i18n="library"></h2>
+          <p class="hint" data-i18n="libraryHint"></p>
+          <div id="index-stats" class="stats"></div>
+
+          <label class="drop" id="drop">
+            <input type="file" id="file-input" multiple accept=".pdf,.docx,.txt,.md,.markdown,.html,.htm,.csv">
+            <strong data-i18n="upload"></strong>
+            <span data-i18n="uploadHint"></span>
+          </label>
+          <div id="upload-log" class="upload-log" aria-live="polite"></div>
+
+          <div class="poison">
+            <button type="button" id="poison-btn" class="ghost" data-i18n="poison"></button>
+            <p class="hint" data-i18n="poisonHint"></p>
+          </div>
+
+          <fieldset class="chunking">
+            <legend data-i18n="chunking"></legend>
+            <label><span data-i18n="chunkSize"></span>
+              <select id="chunk-size">
+                <option value="300">300</option>
+                <option value="600">600</option>
+                <option value="1200">1200</option>
+              </select>
+            </label>
+            <label><span data-i18n="overlap"></span>
+              <select id="chunk-overlap">
+                <option value="0">0 %</option>
+                <option value="0.15">15 %</option>
+                <option value="0.3">30 %</option>
+              </select>
+            </label>
+            <button type="button" id="rebuild-btn" class="ghost" data-i18n="rebuild"></button>
+          </fieldset>
+
+          <ul id="doc-list" class="doc-list"></ul>
+        </div>
+        <div class="lib-main">
+          <h2 class="title" data-i18n="inspector"></h2>
+          <p class="hint" id="inspector-hint" data-i18n="inspectorHint"></p>
+          <div id="inspector" class="inspector"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ EVALUATION -->
+    <section id="view-eval" class="view" data-view-panel="eval" hidden>
+      <div class="eval-head">
+        <div>
+          <h2 class="title" data-i18n="evalTitle"></h2>
+          <p class="hint wide" data-i18n="evalHint"></p>
+        </div>
+        <div class="eval-actions">
+          <button type="button" id="eval-btn" class="primary" data-i18n="runEval"></button>
+          <button type="button" id="csv-btn" class="ghost" data-i18n="exportCsv" disabled></button>
+        </div>
+      </div>
+      <div id="eval-progress" class="progress" hidden><span class="dot"></span><span id="eval-progress-text"></span></div>
+      <div id="eval-notice" class="notice" hidden></div>
+      <div id="eval-results"></div>
+    </section>
+
+    <!-- ================================================================ HOW -->
+    <section id="view-how" class="view how" data-view-panel="how" hidden>
+      <h2 class="title" data-i18n="howTitle"></h2>
+
+      <div class="pipeline" aria-label="Pipeline">
+        <div class="lane">
+          <span class="lane-label lang-block" data-lang-block="fr">Indexation (une fois)</span>
+          <span class="lane-label lang-block" data-lang-block="en">Indexing (once)</span>
+          <ol class="steps">
+            <li><b>Documents</b><span class="lang-block" data-lang-block="fr">PDF, Word, Markdown, texte</span><span class="lang-block" data-lang-block="en">PDF, Word, Markdown, text</span></li>
+            <li><b>Chunking</b><span class="lang-block" data-lang-block="fr">par section, taille et chevauchement réglables</span><span class="lang-block" data-lang-block="en">by section, adjustable size and overlap</span></li>
+            <li><b>BM25</b><span class="lang-block" data-lang-block="fr">index de mots-clés, dans le navigateur</span><span class="lang-block" data-lang-block="en">keyword index, in the browser</span></li>
+            <li><b>bge-m3</b><span class="lang-block" data-lang-block="fr">vecteurs multilingues (1024 dimensions), mis en cache</span><span class="lang-block" data-lang-block="en">multilingual vectors (1024 dimensions), cached</span></li>
+          </ol>
+        </div>
+        <div class="lane">
+          <span class="lane-label lang-block" data-lang-block="fr">À chaque question</span>
+          <span class="lane-label lang-block" data-lang-block="en">For every question</span>
+          <ol class="steps">
+            <li><b>BM25 + vecteurs</b><span class="lang-block" data-lang-block="fr">20 candidats chacun</span><span class="lang-block" data-lang-block="en">20 candidates each</span></li>
+            <li><b>RRF</b><span class="lang-block" data-lang-block="fr">fusion par les rangs, sans calibrer les scores</span><span class="lang-block" data-lang-block="en">fusion by rank, no score calibration</span></li>
+            <li><b>Reranker</b><span class="lang-block" data-lang-block="fr">cross-encoder qui relit question + passage</span><span class="lang-block" data-lang-block="en">cross-encoder reads question + passage together</span></li>
+            <li><b>Claude</b><span class="lang-block" data-lang-block="fr">répond avec les 5 meilleurs passages, cite [n] ou dit « introuvable »</span><span class="lang-block" data-lang-block="en">answers from the top 5, cites [n] or says “not found”</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="how-cols">
+        <div class="lang-block" data-lang-block="fr">
+          <h3>Choix de conception</h3>
+          <ul>
+            <li><b>Hybride, pas seulement des vecteurs.</b> Les vecteurs comprennent les reformulations et les autres langues ; BM25 trouve les codes exacts (NX-409, article 10) que les vecteurs ratent. La fusion RRF garde le meilleur des deux.</li>
+            <li><b>Reranking.</b> Le cross-encoder lit la question et le passage ensemble : plus précis qu’une similarité de vecteurs, appliqué seulement aux 20 meilleurs candidats.</li>
+            <li><b>En-tête de contexte.</b> Chaque passage est indexé avec « document › section » : un passage isolé sait de quoi il parle.</li>
+            <li><b>Citations vérifiées.</b> Chaque phrase doit citer [n] ; l’interface signale les citations inventées et le taux de phrases citées.</li>
+            <li><b>Mesurer avant d’affirmer.</b> Un jeu de 24 questions étiquetées compare les méthodes (hit@k, MRR), par type de question.</li>
+          </ul>
+          <h3>Sécurité</h3>
+          <ul>
+            <li>Instructions et liste des modèles fixées côté serveur ; le navigateur n’envoie que la question et les passages, revalidés champ par champ.</li>
+            <li>Les passages sont encadrés comme des données ; une balise injectée est neutralisée. Bouton « document piégé » pour le démontrer.</li>
+            <li>CSP stricte sans script en ligne, HSTS, limitation de débit par IP, code d’accès comparé en temps constant, erreurs du fournisseur jamais renvoyées.</li>
+          </ul>
+          <h3>Limites et suite</h3>
+          <ul>
+            <li>Index en mémoire du navigateur : parfait jusqu’à quelques milliers de passages. Au-delà : index vectoriel côté serveur (pgvector, Vectorize) avec droits d’accès par document.</li>
+            <li>Pas encore de réécriture des questions de suivi ni d’OCR des PDF scannés.</li>
+            <li>Évaluation de la génération (fidélité aux sources) par un modèle juge : prochaine étape.</li>
+          </ul>
+        </div>
+        <div class="lang-block" data-lang-block="en">
+          <h3>Design choices</h3>
+          <ul>
+            <li><b>Hybrid, not vectors only.</b> Vectors understand paraphrases and other languages; BM25 finds exact codes (NX-409, article 10) that vectors miss. RRF fusion keeps the best of both.</li>
+            <li><b>Reranking.</b> The cross-encoder reads question and passage together: more precise than vector similarity, applied only to the top 20 candidates.</li>
+            <li><b>Context header.</b> Each passage is indexed with “document › section”, so an isolated passage knows what it is about.</li>
+            <li><b>Checked citations.</b> Every sentence must cite [n]; the interface flags invented citations and shows the share of cited sentences.</li>
+            <li><b>Measure before claiming.</b> A labelled set of 24 questions compares the methods (hit@k, MRR), per question type.</li>
+          </ul>
+          <h3>Security</h3>
+          <ul>
+            <li>Instructions and model list fixed on the server; the browser only sends the question and passages, re-validated field by field.</li>
+            <li>Passages are fenced as data and injected tags are neutralised. The “poisoned document” button demonstrates it.</li>
+            <li>Strict CSP with no inline script, HSTS, per-IP rate limits, constant-time access code check, provider errors never forwarded.</li>
+          </ul>
+          <h3>Limits and next steps</h3>
+          <ul>
+            <li>In-browser index: ideal up to a few thousand passages. Beyond that: a server-side vector index (pgvector, Vectorize) with per-document access rights.</li>
+            <li>No follow-up question rewriting or OCR of scanned PDFs yet.</li>
+            <li>Generation evaluation (faithfulness to sources) with a judge model: next step.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="access" class="access">
+    <form id="access-form" method="dialog">
+      <h2 data-i18n="accessTitle"></h2>
+      <p data-i18n="accessHint"></p>
+      <input id="access-input" type="password" autocomplete="off" maxlength="200" required>
+      <p id="access-error" class="error" hidden data-i18n="accessWrong"></p>
+      <button type="submit" class="primary" data-i18n="enter"></button>
+    </form>
+  </dialog>
+
+  <footer class="foot">
+    <span>Verity · Pinninti Sai Anish</span>
+    <span class="lang-block" data-lang-block="fr">Nexa Digital et ses documents sont fictifs.</span>
+    <span class="lang-block" data-lang-block="en">Nexa Digital and its documents are fictional.</span>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "description": "Golden evaluation set: 24 real questions, each labelled with the document section(s) that contain the answer. Mix of exact codes, French paraphrases, and cross-language questions (English question on a French document and the reverse).",
+  "questions": [
+    { "id": "q01", "type": "exact", "q": "Que signifie l'erreur NX-409 ?", "expect": [{ "doc": "14-nexa-gestion-api-guide", "section": "Error codes" }] },
+    { "id": "q02", "type": "exact", "q": "What does NX-503 mean?", "expect": [{ "doc": "14-nexa-gestion-api-guide", "section": "Error codes" }] },
+    { "id": "q03", "type": "exact", "q": "Quel est le format de numérotation des avoirs ?", "expect": [{ "doc": "02-procedure-facturation-relance", "section": "Avoirs" }] },
+    { "id": "q04", "type": "exact", "q": "Que prévoit l'article 10 des CGV ?", "expect": [{ "doc": "06-conditions-generales-de-vente", "section": "Article 10" }] },
+    { "id": "q05", "type": "paraphrase", "q": "Combien de jours par semaine puis-je travailler depuis chez moi ?", "expect": [{ "doc": "09-guide-collaborateurs", "section": "Télétravail" }] },
+    { "id": "q06", "type": "paraphrase", "q": "Un client n'a toujours pas payé six semaines après l'échéance : que doit-on faire ?", "expect": [{ "doc": "02-procedure-facturation-relance", "section": "Relances" }] },
+    { "id": "q07", "type": "paraphrase", "q": "Combien de temps garde-t-on les CV des candidats refusés ?", "expect": [{ "doc": "04-politique-rgpd-conservation", "section": "Durées de conservation" }] },
+    { "id": "q08", "type": "paraphrase", "q": "A-t-on le droit de mettre une nouvelle version en ligne un vendredi ?", "expect": [{ "doc": "07-guide-onboarding-developpeurs", "section": "Mise en production" }] },
+    { "id": "q09", "type": "paraphrase", "q": "Quelle part du déjeuner est payée par l'employeur ?", "expect": [{ "doc": "09-guide-collaborateurs", "section": "Avantages" }] },
+    { "id": "q10", "type": "paraphrase", "q": "Si le serveur principal tombe, qui décide de basculer sur le site de secours ?", "expect": [{ "doc": "11-plan-sauvegarde-reprise", "section": "Déclenchement du PRA" }] },
+    { "id": "q11", "type": "paraphrase", "q": "Ai-je le droit de coller des données clients dans ChatGPT ?", "expect": [{ "doc": "15-charte-informatique", "section": "intelligence artificielle" }] },
+    { "id": "q12", "type": "paraphrase", "q": "Que se passe-t-il quand le client demande une fonctionnalité en plus au milieu du projet ?", "expect": [{ "doc": "13-methodologie-projet", "section": "Demandes de changement" }] },
+    { "id": "q13", "type": "paraphrase", "q": "Combien de temps le client a-t-il pour signaler des bugs après la livraison ?", "expect": [{ "doc": "06-conditions-generales-de-vente", "section": "Article 6" }, { "doc": "13-methodologie-projet", "section": "Phases" }] },
+    { "id": "q14", "type": "cross-lingual", "q": "How long do we have to notify the regulator after a personal data breach?", "expect": [{ "doc": "04-politique-rgpd-conservation", "section": "Violation" }, { "doc": "10-incident-response-runbook", "section": "First steps" }] },
+    { "id": "q15", "type": "cross-lingual", "q": "What is the maximum resolution time for a critical support ticket?", "expect": [{ "doc": "05-procedure-support-sla", "section": "Délais de résolution" }] },
+    { "id": "q16", "type": "cross-lingual", "q": "How much can I spend on a meal during a business trip?", "expect": [{ "doc": "09-guide-collaborateurs", "section": "Notes de frais" }] },
+    { "id": "q17", "type": "cross-lingual", "q": "How often do we test restoring a backup?", "expect": [{ "doc": "11-plan-sauvegarde-reprise", "section": "Tests de restauration" }] },
+    { "id": "q18", "type": "cross-lingual", "q": "Which password hashing algorithm and cost factor are required?", "expect": [{ "doc": "03-politique-securite", "section": "Mots de passe" }] },
+    { "id": "q19", "type": "cross-lingual", "q": "What deposit do we invoice when the client signs the quote?", "expect": [{ "doc": "02-procedure-facturation-relance", "section": "Acomptes" }] },
+    { "id": "q20", "type": "cross-lingual", "q": "En combien de temps l'ingénieur d'astreinte doit-il accuser réception d'une alerte SEV1 ?", "expect": [{ "doc": "10-incident-response-runbook", "section": "On-call" }] },
+    { "id": "q21", "type": "cross-lingual", "q": "Pendant combien de temps le lien de réinitialisation du mot de passe client est-il valable ?", "expect": [{ "doc": "12-client-faq", "section": "forgot my client-area password" }] },
+    { "id": "q22", "type": "cross-lingual", "q": "Comment vérifier qu'un appel de webhook vient bien de Nexa Gestion ?", "expect": [{ "doc": "14-nexa-gestion-api-guide", "section": "Webhooks" }] },
+    { "id": "q23", "type": "paraphrase", "q": "Quel est le prix de la formule de maintenance avec astreinte la nuit et le week-end ?", "expect": [{ "doc": "08-catalogue-offres-tarifs", "section": "Maintenance et infogérance" }] },
+    { "id": "q24", "type": "cross-lingual", "q": "Sous quel délai le postmortem d'un incident doit-il être publié ?", "expect": [{ "doc": "10-incident-response-runbook", "section": "Postmortem" }] }
+  ]
+}

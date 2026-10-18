@@ -1,0 +1,36 @@
+name = "verity"
+main = "src/worker.js"
+compatibility_date = "2025-01-01"
+
+# Static app in /public, served through the ASSETS binding. The Worker runs
+# first so every response gets HTTPS enforcement and the security headers.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+# Workers AI: bge-m3 embeddings and bge-reranker-base, billed to the same
+# Cloudflare account (the free daily allowance covers a demo).
+[ai]
+binding = "AI"
+
+# Per-IP limits. Indexing the demo corpus and one evaluation run use about 35
+# retrieval calls; one answer is one Claude call.
+[[unsafe.bindings]]
+name = "RETRIEVAL_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "2001"
+simple = { limit = 120, period = 60 }
+
+[[unsafe.bindings]]
+name = "ANSWER_RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "2002"
+simple = { limit = 20, period = 60 }
+
+[vars]
+ANSWER_MODEL = "claude-haiku-4-5"
+
+# Secrets, never stored here:
+#   wrangler secret put ANTHROPIC_API_KEY   (required for answers)
+#   wrangler secret put ACCESS_CODE         (recommended for a public demo)

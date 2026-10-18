@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Corpus is reproducible
+        run: node scripts/build_corpus.mjs && git diff --exit-code public/data
+      - name: Unit tests
+        run: npm test
+      - name: No secrets in source
+        run: |
+          if grep -rEn "sk-ant-[A-Za-z0-9_-]{20,}" --include='*.js' --include='*.json' --include='*.toml' --include='*.html' --exclude-dir=node_modules .; then
+            echo "::error::A hardcoded API key was found."; exit 1
+          fi
